@@ -1,0 +1,38 @@
+services:
+  grafana:
+    image: grafana/grafana:11.5.2
+    restart: unless-stopped
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      # Database credentials passed to datasource provisioning
+      - N8N_POSTGRES_DB=${N8N_POSTGRES_DB}
+      - N8N_POSTGRES_USER=${N8N_POSTGRES_USER}
+      - N8N_POSTGRES_PASSWORD=${N8N_POSTGRES_PASSWORD}
+      - LITELLM_POSTGRES_USER=${LITELLM_POSTGRES_USER}
+      - LITELLM_POSTGRES_PASSWORD=${LITELLM_POSTGRES_PASSWORD}
+      - WORKOFLOW_MARIADB_USER=${WORKOFLOW_MARIADB_USER}
+      - WORKOFLOW_MARIADB_PASSWORD=${WORKOFLOW_MARIADB_PASSWORD}
+      - N8N_CUSTOM_POSTGRES_USER=${N8N_CUSTOM_POSTGRES_USER}
+      - N8N_CUSTOM_POSTGRES_PASSWORD=${N8N_CUSTOM_POSTGRES_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
+    networks:
+      - n8n_network
+      - workoflow_network
+
+networks:
+  n8n_network:
+    external: true
+    name: n8n_default
+  workoflow_network:
+    external: true
+    name: workoflow-integration-platform_workoflow
+
+volumes:
+  grafana-data:

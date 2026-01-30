@@ -1,0 +1,68 @@
+apiVersion: 1
+
+datasources:
+  - name: N8N Internal Postgres
+    type: postgres
+    uid: n8n-internal
+    url: n8n-postgres-1:5432
+    database: ${N8N_POSTGRES_DB}
+    user: ${N8N_POSTGRES_USER}
+    secureJsonData:
+      password: ${N8N_POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+    isDefault: false
+    editable: true
+
+  - name: LiteLLM Postgres
+    type: postgres
+    uid: litellm-postgres
+    url: litellm-postgres:5432
+    database: litellm
+    user: ${LITELLM_POSTGRES_USER}
+    secureJsonData:
+      password: ${LITELLM_POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+    isDefault: true
+    editable: true
+
+  - name: Workoflow MariaDB
+    type: mysql
+    uid: workoflow-mariadb
+    url: mariadb:3306
+    database: workoflow_db
+    user: ${WORKOFLOW_MARIADB_USER}
+    secureJsonData:
+      password: ${WORKOFLOW_MARIADB_PASSWORD}
+    jsonData:
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+    isDefault: false
+    editable: true
+
+  - name: N8N Custom Tables
+    type: postgres
+    uid: n8n-custom
+    url: n8n-postgres-1:5432
+    database: postgres
+    user: ${N8N_CUSTOM_POSTGRES_USER}
+    secureJsonData:
+      password: ${N8N_CUSTOM_POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+    isDefault: false
+    editable: true
