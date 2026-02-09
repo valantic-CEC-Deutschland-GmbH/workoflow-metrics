@@ -61,6 +61,12 @@ See `DATASOURCES.md` for full panel-by-panel documentation.
 - **MariaDB JSON** — use `JSON_UNQUOTE(JSON_EXTRACT(data, '$.field'))` syntax
 - **Postgres quoted identifiers** — table names like `"LiteLLM_DailyUserSpend"` need double quotes
 
+## Changelog
+
+- **Always update `CHANGELOG.md`** when making dashboard or infrastructure changes
+- Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
+- Group entries under date headings (`## YYYY-MM-DD`) with `### Added`, `### Fixed`, `### Changed` sections
+
 ## Git
 
 - **Repo:** `valantic-CEC-Deutschland-GmbH/workoflow-metrics`

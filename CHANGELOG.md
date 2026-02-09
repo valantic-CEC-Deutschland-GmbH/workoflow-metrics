@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## 2026-02-09
 
 ### Fixed
+- **Feedback rating gauge showing green at wrong position** — Gauge scale was 0-5 but actual ratings are 1-3 (1=Bad, 2=Fine, 3=Good). Fixed scale to 1-3 with correct thresholds. Dismissed ratings (value=0) were included in AVG, dragging it down. Added `AND rating_value > 0` filter. Affects: User Activity "Avg User Feedback Rating" and Executive Summary "User Satisfaction" gauges.
+- **Rating distribution bar chart included dismissed ratings** — Bar chart showed a "0" bar for dismissed ratings. Added `AND rating_value > 0` filter and CASE labels (1 - Bad, 2 - Fine, 3 - Good). Affects: User Activity "User Feedback Rating Distribution".
 - **LiteLLM time-series panels showing "No data"** — The `date` column in `LiteLLM_DailyUserSpend` is type `text`, not `timestamp`. All LiteLLM queries now cast `date::timestamp` so Grafana can use it as a time axis. Affects: Daily Spend by Model, Token Consumption, Request Volume, Failed Requests, Cost vs Usage Trend, and all stat panels using time filters.
 - **n8n insights panels showing "No data"** — Column names were wrong: `periodStartDate` → `periodStart`, `metadataId` → `metaId`, JOIN used `m.id` instead of `m."metaId"`, and WHERE used `m.type` instead of `p.type`. Affects: Estimated Time Saved, Runtime Trend, Estimated Hours Saved.
 - **Chat Conversations showing "No data"** — Column was `session_id` not `"sessionId"`, and table has no timestamp column. Removed time filter. Affects: Executive Summary and User Activity dashboards.
