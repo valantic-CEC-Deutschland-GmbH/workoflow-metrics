@@ -20,7 +20,9 @@ usage() {
 }
 
 run_remote() {
-    ssh "$REMOTE_HOST" "sudo -iu $REMOTE_USER bash -c '$1'"
+    ssh "$REMOTE_HOST" "sudo -iu $REMOTE_USER bash" <<REMOTE_EOF
+$1
+REMOTE_EOF
 }
 
 cmd_setup() {
@@ -35,7 +37,7 @@ cmd_setup() {
     # Clone repo if not exists
     run_remote "
         if [ ! -d $REMOTE_DIR ]; then
-            cd /home/docker/docker-setups && git clone git@github.com:valantic-CEC-Deutschland-GmbH/workoflow-metrics.git
+            cd /home/docker/docker-setups && git clone https://github.com/valantic-CEC-Deutschland-GmbH/workoflow-metrics.git
         else
             echo 'Repository already exists, pulling latest...'
             cd $REMOTE_DIR && git pull
@@ -45,7 +47,8 @@ cmd_setup() {
     # Copy .env to remote
     echo "==> Copying .env to remote..."
     scp "$PROJECT_DIR/.env" "$REMOTE_HOST:/tmp/workoflow-metrics-env"
-    run_remote "cp /tmp/workoflow-metrics-env $REMOTE_DIR/.env && rm /tmp/workoflow-metrics-env"
+    run_remote "cp /tmp/workoflow-metrics-env $REMOTE_DIR/.env"
+    ssh "$REMOTE_HOST" "rm -f /tmp/workoflow-metrics-env"
 
     # Start Grafana
     echo "==> Starting Grafana..."
