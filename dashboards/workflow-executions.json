@@ -583,7 +583,7 @@
             "showPoints": "auto",
             "spanNulls": false,
             "stacking": {
-              "mode": "none",
+              "mode": "normal",
               "group": "A"
             },
             "axisBorderShow": false,
@@ -604,8 +604,7 @@
             }
           },
           "color": {
-            "mode": "fixed",
-            "fixedColor": "purple"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
@@ -618,11 +617,11 @@
       },
       "options": {
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         },
         "legend": {
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "bottom",
           "calcs": ["sum"]
         }
@@ -633,7 +632,67 @@
             "type": "postgres",
             "uid": "n8n-internal"
           },
-          "rawSql": "SELECT\n  p.\"periodStart\" AS time,\n  SUM(p.value) AS \"Time Saved (minutes)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")\nGROUP BY p.\"periodStart\"\nORDER BY 1",
+          "rawSql": "SELECT\n  p.\"periodStart\" AS time,\n  m.\"workflowName\" AS metric,\n  SUM(p.value) AS \"Time Saved\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")\nGROUP BY p.\"periodStart\", m.\"workflowName\"\nORDER BY 1",
+          "format": "table",
+          "refId": "A",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Top Workflows by Time Saved",
+      "type": "barchart",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "n8n-internal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "min",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "barWidth": 0.8,
+        "showValue": "auto",
+        "groupWidth": 0.7,
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "n8n-internal"
+          },
+          "rawSql": "SELECT\n  m.\"workflowName\" AS \"Workflow\",\n  ROUND(SUM(p.value), 0) AS \"Time Saved (minutes)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")\nGROUP BY m.\"workflowName\"\nORDER BY \"Time Saved (minutes)\" DESC\nLIMIT 15",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -648,7 +707,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 36
       },
       "datasource": {
         "type": "postgres",
@@ -731,7 +790,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 44
       },
       "datasource": {
         "type": "postgres",
