@@ -236,16 +236,16 @@
       "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
       "fieldConfig": {
         "defaults": {
-          "min": 0,
-          "max": 5,
+          "min": 1,
+          "max": 3,
           "decimals": 1,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "red", "value": null },
-              { "color": "orange", "value": 2 },
-              { "color": "yellow", "value": 3 },
-              { "color": "green", "value": 4 }
+              { "color": "orange", "value": 1.5 },
+              { "color": "yellow", "value": 2.0 },
+              { "color": "green", "value": 2.5 }
             ]
           },
           "color": { "mode": "thresholds" }
@@ -265,7 +265,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "n8n-custom" },
-          "rawSql": "SELECT ROUND(AVG(rating_value)::numeric, 1) AS \"User Satisfaction\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(\"timestamp\")",
+          "rawSql": "SELECT ROUND(AVG(rating_value)::numeric, 1) AS \"User Satisfaction\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(\"timestamp\")\n  AND rating_value > 0",
           "refId": "A",
           "format": "table"
         }
@@ -667,7 +667,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "n8n-internal" },
-          "rawSql": "SELECT\n  ROUND(SUM(p.value), 0) AS \"Time Saved (minutes)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")",
+          "rawSql": "SELECT SUM(ts) AS \"Time Saved (minutes)\" FROM (\n  SELECT COUNT(*) * (w.settings::json->>'timeSavedPerExecution')::numeric AS ts\n  FROM execution_entity e\n  JOIN workflow_entity w ON e.\"workflowId\" = w.id\n  WHERE $__timeFilter(e.\"startedAt\")\n    AND e.status = 'success'\n    AND w.settings::json->>'timeSavedPerExecution' IS NOT NULL\n  GROUP BY w.id, w.settings::json->>'timeSavedPerExecution'\n) sub",
           "refId": "A",
           "format": "table"
         }
