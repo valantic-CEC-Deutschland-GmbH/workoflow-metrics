@@ -630,7 +630,7 @@
     },
     {
       "id": 12,
-      "title": "Estimated Hours Saved by Automation",
+      "title": "Estimated Time Saved by Automation",
       "type": "stat",
       "datasource": {
         "type": "postgres",
@@ -639,7 +639,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
       "fieldConfig": {
         "defaults": {
-          "unit": "h",
+          "unit": "min",
           "decimals": 0,
           "thresholds": {
             "mode": "absolute",
@@ -667,7 +667,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "n8n-internal" },
-          "rawSql": "SELECT\n  ROUND(SUM(p.value) / 60, 0) AS \"Estimated Hours Saved\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")",
+          "rawSql": "SELECT\n  ROUND(SUM(p.value), 0) AS \"Time Saved (minutes)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")",
           "refId": "A",
           "format": "table"
         }
