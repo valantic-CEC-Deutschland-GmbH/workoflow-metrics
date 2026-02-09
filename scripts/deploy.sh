@@ -35,7 +35,7 @@ cmd_setup() {
     # Clone repo if not exists
     run_remote "
         if [ ! -d $REMOTE_DIR ]; then
-            cd /home/docker/docker-setups && git clone git@github.com:valantic/workoflow-metrics.git
+            cd /home/docker/docker-setups && git clone git@github.com:valantic-CEC-Deutschland-GmbH/workoflow-metrics.git
         else
             echo 'Repository already exists, pulling latest...'
             cd $REMOTE_DIR && git pull

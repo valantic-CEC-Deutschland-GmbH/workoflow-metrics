@@ -1,0 +1,677 @@
+{
+  "id": null,
+  "uid": "executive-summary",
+  "title": "Executive Summary",
+  "tags": ["workoflow", "executive", "kpi"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "refresh": "5m",
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "weekStart": "",
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "LLM Costs & Usage",
+      "tooltip": "Detailed LLM cost and usage metrics",
+      "type": "link",
+      "url": "/d/llm-costs-usage"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Workflow Executions",
+      "tooltip": "Detailed workflow execution metrics",
+      "type": "link",
+      "url": "/d/workflow-executions"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Tool Usage",
+      "tooltip": "Detailed tool usage analytics",
+      "type": "link",
+      "url": "/d/tool-usage"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "User Activity",
+      "tooltip": "Detailed user activity and platform health",
+      "type": "link",
+      "url": "/d/user-activity"
+    }
+  ],
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "Primary KPIs",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 1,
+      "title": "Active Users (30d)",
+      "type": "stat",
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 50 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT COUNT(DISTINCT user_id) AS \"Active Users (30d)\"\nFROM audit_log\nWHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Total LLM Spend",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "litellm-postgres"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 500 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "litellm-postgres" },
+          "rawSql": "SELECT SUM(spend) AS \"Total LLM Spend\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Workflows Automated",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "n8n-internal"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 20 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "n8n-internal" },
+          "rawSql": "SELECT COUNT(DISTINCT \"workflowId\") AS \"Workflows Automated\"\nFROM execution_entity\nWHERE $__timeFilter(\"startedAt\")",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "User Satisfaction",
+      "type": "gauge",
+      "datasource": {
+        "type": "postgres",
+        "uid": "n8n-custom"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 5,
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 2 },
+              { "color": "yellow", "value": 3 },
+              { "color": "green", "value": 4 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "n8n-custom" },
+          "rawSql": "SELECT ROUND(AVG(rating_value)::numeric, 1) AS \"User Satisfaction\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(created_at)",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "type": "row",
+      "title": "Secondary KPIs",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 5,
+      "title": "Tool Executions",
+      "type": "stat",
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 7 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 100 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT COUNT(*) AS \"Tool Executions\"\nFROM audit_log\nWHERE action = 'tool_execution.started'\n  AND $__timeFilter(created_at)",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Cost per Request",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "litellm-postgres"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 7 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "litellm-postgres" },
+          "rawSql": "SELECT\n  ROUND(SUM(spend)::numeric / NULLIF(SUM(api_requests), 0), 4) AS \"Cost per Request\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Chat Conversations",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "n8n-custom"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 7 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "purple", "value": null },
+              { "color": "green", "value": 100 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "n8n-custom" },
+          "rawSql": "SELECT COUNT(DISTINCT \"sessionId\") AS \"Chat Conversations\"\nFROM n8n_chat_histories\nWHERE $__timeFilter(\"createdAt\")",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Automation Success Rate",
+      "type": "gauge",
+      "datasource": {
+        "type": "postgres",
+        "uid": "n8n-internal"
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 7 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 80 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "n8n-internal" },
+          "rawSql": "SELECT\n  ROUND(\n    COUNT(CASE WHEN status = 'success' THEN 1 END)::numeric /\n    NULLIF(COUNT(*)::numeric, 0) * 100,\n    1\n  ) AS \"Automation Success Rate\"\nFROM execution_entity\nWHERE $__timeFilter(\"startedAt\")",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "type": "row",
+      "title": "Trends",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 12 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 9,
+      "title": "Weekly Platform Activity",
+      "type": "timeseries",
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": { "mode": "none", "group": "A" },
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["sum"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT\n  DATE(created_at) AS time,\n  COUNT(DISTINCT user_id) AS \"Active Users\",\n  COUNT(*) AS \"Total Actions\"\nFROM audit_log\nWHERE $__timeFilter(created_at)\nGROUP BY DATE(created_at)\nORDER BY time",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Cost vs Usage Trend",
+      "type": "timeseries",
+      "datasource": {
+        "type": "postgres",
+        "uid": "litellm-postgres"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": { "mode": "none", "group": "A" },
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Requests" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "right" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["sum"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "litellm-postgres" },
+          "rawSql": "SELECT\n  date AS time,\n  SUM(spend) AS \"Spend ($)\",\n  SUM(api_requests) AS \"Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "type": "row",
+      "title": "Details",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "title": "Top 10 Integrations by Usage",
+      "type": "barchart",
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "gradientMode": "scheme",
+            "axisBorderShow": false
+          },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "barWidth": 0.8,
+        "showValue": "auto",
+        "groupWidth": 0.7,
+        "stacking": "none",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false,
+          "calcs": []
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT\n  action AS \"Integration\",\n  COUNT(*) AS \"Usage\"\nFROM audit_log\nWHERE $__timeFilter(created_at)\n  AND action NOT LIKE 'user.%'\nGROUP BY action\nORDER BY COUNT(*) DESC\nLIMIT 10",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Estimated Hours Saved by Automation",
+      "type": "stat",
+      "datasource": {
+        "type": "postgres",
+        "uid": "n8n-internal"
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 10 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "n8n-internal" },
+          "rawSql": "SELECT\n  ROUND(SUM(p.value) / 3600, 0) AS \"Estimated Hours Saved\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metadataId\" = m.id\nWHERE m.type = 0\n  AND $__timeFilter(p.\"periodStartDate\")",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    }
+  ]
+}

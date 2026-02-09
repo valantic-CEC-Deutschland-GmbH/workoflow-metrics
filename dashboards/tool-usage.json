@@ -302,7 +302,7 @@
             "type": "mysql",
             "uid": "workoflow-mariadb"
           },
-          "rawSql": "SELECT\n  JSON_EXTRACT(data, '$.tool_name') AS tool_name,\n  COUNT(*) AS usage_count\nFROM audit_log\nWHERE action LIKE 'tool_execution%'\n  AND $__timeFilter(created_at)\nGROUP BY tool_name\nORDER BY usage_count DESC\nLIMIT 15",
+          "rawSql": "SELECT\n  JSON_UNQUOTE(JSON_EXTRACT(data, '$.tool_name')) AS tool_name,\n  COUNT(*) AS usage_count\nFROM audit_log\nWHERE action LIKE 'tool_execution%'\n  AND $__timeFilter(created_at)\nGROUP BY tool_name\nORDER BY usage_count DESC\nLIMIT 15",
           "format": "table",
           "editorMode": "code"
         }
@@ -523,7 +523,118 @@
             "type": "mysql",
             "uid": "workoflow-mariadb"
           },
-          "rawSql": "SELECT\n  JSON_EXTRACT(data, '$.tool_name') AS tool_name,\n  SUM(CASE WHEN action = 'tool_execution.started' THEN 1 ELSE 0 END) AS started,\n  SUM(CASE WHEN action = 'tool_execution.failed' THEN 1 ELSE 0 END) AS failed,\n  ROUND(\n    SUM(CASE WHEN action = 'tool_execution.failed' THEN 1 ELSE 0 END) /\n    NULLIF(SUM(CASE WHEN action = 'tool_execution.started' THEN 1 ELSE 0 END), 0) * 100,\n    1\n  ) AS failure_rate_pct\nFROM audit_log\nWHERE action LIKE 'tool_execution%'\n  AND $__timeFilter(created_at)\nGROUP BY tool_name\nORDER BY failed DESC",
+          "rawSql": "SELECT\n  JSON_UNQUOTE(JSON_EXTRACT(data, '$.tool_name')) AS tool_name,\n  SUM(CASE WHEN action = 'tool_execution.started' THEN 1 ELSE 0 END) AS started,\n  SUM(CASE WHEN action = 'tool_execution.failed' THEN 1 ELSE 0 END) AS failed,\n  ROUND(\n    SUM(CASE WHEN action = 'tool_execution.failed' THEN 1 ELSE 0 END) /\n    NULLIF(SUM(CASE WHEN action = 'tool_execution.started' THEN 1 ELSE 0 END), 0) * 100,\n    1\n  ) AS failure_rate_pct\nFROM audit_log\nWHERE action LIKE 'tool_execution%'\n  AND $__timeFilter(created_at)\nGROUP BY tool_name\nORDER BY failed DESC",
+          "format": "table",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Tool Execution Duration (avg/max)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": { "mode": "none", "group": "A" },
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "scaleDistribution": { "type": "linear" },
+            "hideFrom": { "tooltip": false, "viz": false, "legend": false },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT\n  DATE(s.created_at) AS time,\n  ROUND(AVG(TIMESTAMPDIFF(SECOND, s.created_at, c.created_at)), 2) AS \"Avg Duration (s)\",\n  MAX(TIMESTAMPDIFF(SECOND, s.created_at, c.created_at)) AS \"Max Duration (s)\"\nFROM audit_log s\nJOIN audit_log c\n  ON JSON_UNQUOTE(JSON_EXTRACT(s.data, '$.execution_id')) = JSON_UNQUOTE(JSON_EXTRACT(c.data, '$.execution_id'))\n  AND s.action = 'tool_execution.started'\n  AND c.action = 'tool_execution.completed'\nWHERE $__timeFilter(s.created_at)\nGROUP BY DATE(s.created_at)\nORDER BY time",
+          "refId": "A",
+          "format": "table",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Top Users by Tool Usage",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false,
+            "filterable": true
+          },
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [{ "displayName": "tool_calls", "desc": true }],
+        "footer": {
+          "show": true,
+          "reducer": ["sum"],
+          "countRows": false,
+          "fields": ["tool_calls"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT\n  u.email AS user_email,\n  o.name AS organisation,\n  COUNT(*) AS tool_calls\nFROM audit_log al\nJOIN user u ON al.user_id = u.id\nLEFT JOIN organisation o ON u.organisation_id = o.id\nWHERE al.action = 'tool_execution.started'\n  AND $__timeFilter(al.created_at)\nGROUP BY u.email, o.name\nORDER BY tool_calls DESC\nLIMIT 20",
+          "refId": "A",
           "format": "table",
           "editorMode": "code"
         }

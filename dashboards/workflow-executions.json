@@ -76,7 +76,7 @@
         "textMode": "auto",
         "wideLayout": true,
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -191,7 +191,7 @@
         "textMode": "auto",
         "wideLayout": true,
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -490,7 +490,7 @@
             "type": "postgres",
             "uid": "n8n-internal"
           },
-          "rawSql": "SELECT\n  w.name AS \"Workflow\",\n  COUNT(*) AS \"Failures\",\n  ROUND(\n    COUNT(*)::numeric /\n    NULLIF((SELECT COUNT(*) FROM execution_entity e2 WHERE e2.\"workflowId\" = e.\"workflowId\" AND $__timeFilter(e2.\"startedAt\")), 0) * 100,\n    1\n  ) AS \"Failure Rate %\"\nFROM execution_entity e\nJOIN workflow_entity w ON e.\"workflowId\" = w.id\nWHERE e.status = 'error'\n  AND $__timeFilter(e.\"startedAt\")\nGROUP BY w.name, e.\"workflowId\"\nORDER BY \"Failures\" DESC\nLIMIT 10",
+          "rawSql": "SELECT\n  w.name AS \"Workflow\",\n  SUM(CASE WHEN e.status = 'error' THEN 1 ELSE 0 END) AS \"Failures\",\n  ROUND(\n    SUM(CASE WHEN e.status = 'error' THEN 1 ELSE 0 END)::numeric /\n    NULLIF(COUNT(*)::numeric, 0) * 100,\n    1\n  ) AS \"Failure Rate %\"\nFROM execution_entity e\nJOIN workflow_entity w ON e.\"workflowId\" = w.id\nWHERE $__timeFilter(e.\"startedAt\")\nGROUP BY w.name\nHAVING SUM(CASE WHEN e.status = 'error' THEN 1 ELSE 0 END) > 0\nORDER BY \"Failures\" DESC\nLIMIT 10",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -558,7 +558,7 @@
     },
     {
       "id": 8,
-      "title": "Time Saved",
+      "title": "Estimated Time Saved by Automation (minutes)",
       "type": "timeseries",
       "gridPos": {
         "h": 8,
@@ -642,7 +642,7 @@
     },
     {
       "id": 9,
-      "title": "Runtime Trend",
+      "title": "Cumulative Workflow Runtime Trend (seconds)",
       "type": "timeseries",
       "gridPos": {
         "h": 8,
@@ -717,6 +717,73 @@
             "uid": "n8n-internal"
           },
           "rawSql": "SELECT\n  p.\"periodStartDate\" AS time,\n  SUM(p.value) AS \"Total Runtime (s)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metadataId\" = m.id\nWHERE m.type = 1\n  AND $__timeFilter(p.\"periodStartDate\")\nGROUP BY p.\"periodStartDate\"\nORDER BY 1",
+          "format": "table",
+          "refId": "A",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Executions + Distinct Workflows per Day",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "n8n-internal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": { "mode": "none", "group": "A" },
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "scaleDistribution": { "type": "linear" },
+            "hideFrom": { "tooltip": false, "viz": false, "legend": false },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Distinct Workflows" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "right" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["sum"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "n8n-internal" },
+          "rawSql": "SELECT\n  date_trunc('day', \"startedAt\") AS time,\n  COUNT(*) AS \"Executions\",\n  COUNT(DISTINCT \"workflowId\") AS \"Distinct Workflows\"\nFROM execution_entity\nWHERE $__timeFilter(\"startedAt\")\nGROUP BY 1\nORDER BY 1",
           "format": "table",
           "refId": "A",
           "editorMode": "code"

@@ -75,7 +75,7 @@
         "orientation": "auto",
         "textMode": "auto",
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -84,7 +84,7 @@
             "type": "mysql",
             "uid": "workoflow-mariadb"
           },
-          "rawSql": "SELECT COUNT(*) AS \"Total Users\"\nFROM user",
+          "rawSql": "SELECT COUNT(*) AS \"Total Users\"\nFROM user\nWHERE created_at <= $__timeTo()",
           "refId": "A",
           "format": "table"
         }
@@ -128,7 +128,7 @@
         "orientation": "auto",
         "textMode": "auto",
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -137,7 +137,7 @@
             "type": "mysql",
             "uid": "workoflow-mariadb"
           },
-          "rawSql": "SELECT COUNT(*) AS \"Organizations\"\nFROM organisation",
+          "rawSql": "SELECT COUNT(*) AS \"Organizations\"\nFROM organisation\nWHERE created_at <= $__timeTo()",
           "refId": "A",
           "format": "table"
         }
@@ -181,7 +181,7 @@
         "orientation": "auto",
         "textMode": "auto",
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -583,6 +583,185 @@
             "uid": "n8n-custom"
           },
           "rawSql": "SELECT\n  rating_value AS \"Rating\",\n  COUNT(*) AS \"Count\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(created_at)\nGROUP BY rating_value\nORDER BY rating_value",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Daily Active Users (DAU)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": { "mode": "none", "group": "A" },
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT\n  DATE(created_at) AS time,\n  COUNT(DISTINCT user_id) AS \"DAU\"\nFROM audit_log\nWHERE $__timeFilter(created_at)\nGROUP BY DATE(created_at)\nORDER BY time",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Weekly Active Users (WAU)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "barWidthFactor": 0.8,
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "mode": "none", "group": "A" },
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT\n  DATE(DATE_SUB(created_at, INTERVAL WEEKDAY(created_at) DAY)) AS time,\n  COUNT(DISTINCT user_id) AS \"WAU\"\nFROM audit_log\nWHERE $__timeFilter(created_at)\nGROUP BY DATE(DATE_SUB(created_at, INTERVAL WEEKDAY(created_at) DAY))\nORDER BY time",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "New vs Returning Users",
+      "type": "timeseries",
+      "datasource": {
+        "type": "mysql",
+        "uid": "workoflow-mariadb"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "barWidthFactor": 0.8,
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" },
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "New Users" },
+            "properties": [
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Returning Users" },
+            "properties": [
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["sum"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
+          "rawSql": "SELECT\n  d.day AS time,\n  COUNT(DISTINCT CASE WHEN DATE(u.created_at) = d.day THEN al.user_id END) AS \"New Users\",\n  COUNT(DISTINCT CASE WHEN DATE(u.created_at) < d.day THEN al.user_id END) AS \"Returning Users\"\nFROM (\n  SELECT DISTINCT DATE(created_at) AS day\n  FROM audit_log\n  WHERE $__timeFilter(created_at)\n) d\nJOIN audit_log al ON DATE(al.created_at) = d.day\nJOIN user u ON al.user_id = u.id\nWHERE $__timeFilter(al.created_at)\nGROUP BY d.day\nORDER BY d.day",
           "refId": "A",
           "format": "table"
         }

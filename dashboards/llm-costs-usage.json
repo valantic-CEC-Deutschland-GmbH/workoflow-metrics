@@ -76,7 +76,7 @@
         "textMode": "auto",
         "wideLayout": true,
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -134,7 +134,7 @@
         "textMode": "auto",
         "wideLayout": true,
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -192,7 +192,7 @@
         "textMode": "auto",
         "wideLayout": true,
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto"
       },
       "targets": [
@@ -201,7 +201,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT\n  ROUND(\n    COUNT(CASE WHEN cache_hit IS NOT NULL AND cache_hit != '' THEN 1 END)::numeric /\n    NULLIF(COUNT(*)::numeric, 0) * 100,\n    1\n  ) AS \"Cache Hit Rate %\"\nFROM \"LiteLLM_SpendLogs\"\nWHERE $__timeFilter(\"startTime\")",
+          "rawSql": "SELECT\n  ROUND(\n    COUNT(CASE WHEN cache_hit = 'True' OR cache_hit = 'true' THEN 1 END)::numeric /\n    NULLIF(COUNT(*)::numeric, 0) * 100,\n    1\n  ) AS \"Cache Hit Rate %\"\nFROM \"LiteLLM_SpendLogs\"\nWHERE $__timeFilter(\"startTime\")",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -689,6 +689,122 @@
             "uid": "litellm-postgres"
           },
           "rawSql": "SELECT\n  date AS time,\n  SUM(failed_requests) AS \"Failed Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+          "format": "table",
+          "refId": "A",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Spend by User / API Key",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 36
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "litellm-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false,
+            "filterable": true
+          },
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "api_key" },
+            "properties": [{ "id": "unit", "value": "none" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "requests" },
+            "properties": [{ "id": "unit", "value": "short" }]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [{ "displayName": "spend", "desc": true }],
+        "footer": {
+          "show": true,
+          "reducer": ["sum"],
+          "countRows": false,
+          "fields": ["spend", "requests"]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "litellm-postgres" },
+          "rawSql": "SELECT\n  api_key,\n  SUM(spend) AS spend,\n  SUM(api_requests) AS requests,\n  SUM(prompt_tokens) AS prompt_tokens,\n  SUM(completion_tokens) AS completion_tokens\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY api_key\nORDER BY spend DESC",
+          "format": "table",
+          "refId": "A",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Week-over-Week Cost Change",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 36
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "litellm-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "orange", "value": 25 },
+              { "color": "red", "value": 50 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "litellm-postgres" },
+          "rawSql": "WITH this_week AS (\n  SELECT COALESCE(SUM(spend), 0) AS spend\n  FROM \"LiteLLM_DailyUserSpend\"\n  WHERE date >= date_trunc('week', CURRENT_DATE)\n),\nlast_week AS (\n  SELECT COALESCE(SUM(spend), 0) AS spend\n  FROM \"LiteLLM_DailyUserSpend\"\n  WHERE date >= date_trunc('week', CURRENT_DATE) - INTERVAL '7 days'\n    AND date < date_trunc('week', CURRENT_DATE)\n)\nSELECT\n  ROUND(\n    (this_week.spend - last_week.spend)::numeric /\n    NULLIF(last_week.spend, 0) * 100,\n    1\n  ) AS \"WoW Cost Change %\"\nFROM this_week, last_week",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
