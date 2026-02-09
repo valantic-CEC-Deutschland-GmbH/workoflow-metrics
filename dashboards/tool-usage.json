@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "tool-usage",
-  "title": "Tool Usage Analytics",
+  "title": "Tool Usage Analytics (Integration Platform)",
   "tags": ["workoflow", "tools", "analytics"],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -582,7 +582,7 @@
       "targets": [
         {
           "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
-          "rawSql": "SELECT\n  DATE(s.created_at) AS time,\n  ROUND(AVG(TIMESTAMPDIFF(SECOND, s.created_at, c.created_at)), 2) AS \"Avg Duration (s)\",\n  MAX(TIMESTAMPDIFF(SECOND, s.created_at, c.created_at)) AS \"Max Duration (s)\"\nFROM audit_log s\nJOIN audit_log c\n  ON JSON_UNQUOTE(JSON_EXTRACT(s.data, '$.execution_id')) = JSON_UNQUOTE(JSON_EXTRACT(c.data, '$.execution_id'))\n  AND s.action = 'tool_execution.started'\n  AND c.action = 'tool_execution.completed'\nWHERE $__timeFilter(s.created_at)\nGROUP BY DATE(s.created_at)\nORDER BY time",
+          "rawSql": "SELECT\n  DATE(s.created_at) AS time,\n  ROUND(AVG(TIMESTAMPDIFF(SECOND, s.created_at, c.created_at)), 2) AS \"Avg Duration (s)\",\n  MAX(TIMESTAMPDIFF(SECOND, s.created_at, c.created_at)) AS \"Max Duration (s)\"\nFROM audit_log s\nJOIN audit_log c\n  ON s.execution_id = c.execution_id\n  AND s.action = 'tool_execution.started'\n  AND c.action = 'tool_execution.completed'\nWHERE $__timeFilter(s.created_at)\nGROUP BY DATE(s.created_at)\nORDER BY time",
           "refId": "A",
           "format": "table",
           "editorMode": "code"
@@ -633,7 +633,7 @@
       "targets": [
         {
           "datasource": { "type": "mysql", "uid": "workoflow-mariadb" },
-          "rawSql": "SELECT\n  u.email AS user_email,\n  o.name AS organisation,\n  COUNT(*) AS tool_calls\nFROM audit_log al\nJOIN user u ON al.user_id = u.id\nLEFT JOIN organisation o ON u.organisation_id = o.id\nWHERE al.action = 'tool_execution.started'\n  AND $__timeFilter(al.created_at)\nGROUP BY u.email, o.name\nORDER BY tool_calls DESC\nLIMIT 20",
+          "rawSql": "SELECT\n  u.email AS user_email,\n  o.name AS organisation,\n  COUNT(*) AS tool_calls\nFROM audit_log al\nJOIN user u ON al.user_id = u.id\nLEFT JOIN organisation o ON al.organisation_id = o.id\nWHERE al.action = 'tool_execution.started'\n  AND $__timeFilter(al.created_at)\nGROUP BY u.email, o.name\nORDER BY tool_calls DESC\nLIMIT 20",
           "refId": "A",
           "format": "table",
           "editorMode": "code"

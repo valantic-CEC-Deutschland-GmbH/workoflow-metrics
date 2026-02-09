@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "workflow-executions",
-  "title": "Workflow Executions",
+  "title": "Workflow Executions (n8n)",
   "tags": ["workoflow", "n8n", "workflows"],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -633,7 +633,7 @@
             "type": "postgres",
             "uid": "n8n-internal"
           },
-          "rawSql": "SELECT\n  p.\"periodStartDate\" AS time,\n  SUM(p.value) AS \"Time Saved (minutes)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metadataId\" = m.id\nWHERE m.type = 0\n  AND $__timeFilter(p.\"periodStartDate\")\nGROUP BY p.\"periodStartDate\"\nORDER BY 1",
+          "rawSql": "SELECT\n  p.\"periodStart\" AS time,\n  SUM(p.value) AS \"Time Saved (minutes)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")\nGROUP BY p.\"periodStart\"\nORDER BY 1",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -716,7 +716,7 @@
             "type": "postgres",
             "uid": "n8n-internal"
           },
-          "rawSql": "SELECT\n  p.\"periodStartDate\" AS time,\n  SUM(p.value) AS \"Total Runtime (s)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metadataId\" = m.id\nWHERE m.type = 1\n  AND $__timeFilter(p.\"periodStartDate\")\nGROUP BY p.\"periodStartDate\"\nORDER BY 1",
+          "rawSql": "SELECT\n  p.\"periodStart\" AS time,\n  SUM(p.value) AS \"Total Runtime (s)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 1\n  AND $__timeFilter(p.\"periodStart\")\nGROUP BY p.\"periodStart\"\nORDER BY 1",
           "format": "table",
           "refId": "A",
           "editorMode": "code"

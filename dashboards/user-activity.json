@@ -1,6 +1,6 @@
 {
   "uid": "user-activity",
-  "title": "User Activity & Platform Health",
+  "title": "User Activity & Platform Health (Integration Platform)",
   "tags": ["workoflow", "users", "platform"],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -190,7 +190,7 @@
             "type": "postgres",
             "uid": "n8n-custom"
           },
-          "rawSql": "SELECT COUNT(DISTINCT \"sessionId\") AS \"Chat Conversations\"\nFROM n8n_chat_histories\nWHERE $__timeFilter(\"createdAt\")",
+          "rawSql": "SELECT COUNT(DISTINCT session_id) AS \"Chat Conversations\"\nFROM n8n_chat_histories",
           "refId": "A",
           "format": "table"
         }
@@ -245,7 +245,7 @@
             "type": "postgres",
             "uid": "n8n-custom"
           },
-          "rawSql": "SELECT ROUND(AVG(rating_value)::numeric, 2) AS \"Avg Rating\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(created_at)",
+          "rawSql": "SELECT ROUND(AVG(rating_value)::numeric, 2) AS \"Avg Rating\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(\"timestamp\")",
           "refId": "A",
           "format": "table"
         }
@@ -582,7 +582,7 @@
             "type": "postgres",
             "uid": "n8n-custom"
           },
-          "rawSql": "SELECT\n  rating_value AS \"Rating\",\n  COUNT(*) AS \"Count\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(created_at)\nGROUP BY rating_value\nORDER BY rating_value",
+          "rawSql": "SELECT\n  rating_value AS \"Rating\",\n  COUNT(*) AS \"Count\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(\"timestamp\")\nGROUP BY rating_value\nORDER BY rating_value",
           "refId": "A",
           "format": "table"
         }

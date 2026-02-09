@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "executive-summary",
-  "title": "Executive Summary",
+  "title": "Executive Summary (All Sources)",
   "tags": ["workoflow", "executive", "kpi"],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -176,7 +176,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "litellm-postgres" },
-          "rawSql": "SELECT SUM(spend) AS \"Total LLM Spend\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)",
+          "rawSql": "SELECT SUM(spend) AS \"Total LLM Spend\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)",
           "refId": "A",
           "format": "table"
         }
@@ -265,7 +265,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "n8n-custom" },
-          "rawSql": "SELECT ROUND(AVG(rating_value)::numeric, 1) AS \"User Satisfaction\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(created_at)",
+          "rawSql": "SELECT ROUND(AVG(rating_value)::numeric, 1) AS \"User Satisfaction\"\nFROM chat_user_feedback_rating\nWHERE $__timeFilter(\"timestamp\")",
           "refId": "A",
           "format": "table"
         }
@@ -362,7 +362,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "litellm-postgres" },
-          "rawSql": "SELECT\n  ROUND(SUM(spend)::numeric / NULLIF(SUM(api_requests), 0), 4) AS \"Cost per Request\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)",
+          "rawSql": "SELECT\n  ROUND(SUM(spend)::numeric / NULLIF(SUM(api_requests), 0), 4) AS \"Cost per Request\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)",
           "refId": "A",
           "format": "table"
         }
@@ -405,7 +405,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "n8n-custom" },
-          "rawSql": "SELECT COUNT(DISTINCT \"sessionId\") AS \"Chat Conversations\"\nFROM n8n_chat_histories\nWHERE $__timeFilter(\"createdAt\")",
+          "rawSql": "SELECT COUNT(DISTINCT session_id) AS \"Chat Conversations\"\nFROM n8n_chat_histories",
           "refId": "A",
           "format": "table"
         }
@@ -564,7 +564,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "litellm-postgres" },
-          "rawSql": "SELECT\n  date AS time,\n  SUM(spend) AS \"Spend ($)\",\n  SUM(api_requests) AS \"Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+          "rawSql": "SELECT\n  date::timestamp AS time,\n  SUM(spend) AS \"Spend ($)\",\n  SUM(api_requests) AS \"Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)\nGROUP BY date\nORDER BY date",
           "refId": "A",
           "format": "table"
         }
@@ -667,7 +667,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "n8n-internal" },
-          "rawSql": "SELECT\n  ROUND(SUM(p.value) / 3600, 0) AS \"Estimated Hours Saved\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metadataId\" = m.id\nWHERE m.type = 0\n  AND $__timeFilter(p.\"periodStartDate\")",
+          "rawSql": "SELECT\n  ROUND(SUM(p.value) / 3600, 0) AS \"Estimated Hours Saved\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")",
           "refId": "A",
           "format": "table"
         }

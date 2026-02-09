@@ -20,16 +20,17 @@ Grafana joins two existing Docker networks to access databases by container host
 
 ## Dashboards
 
-1. **LLM Costs & Usage** — Daily spend, token consumption, latency, provider distribution
-2. **Workflow Executions** — Execution counts, failure rates, top workflows, runtime trends
-3. **Tool Usage Analytics** — Tool call volumes, failure rates, success/fail breakdown
-4. **User Activity & Platform Health** — Authentications, registrations, chat conversations, feedback ratings
+1. **Executive Summary** — CEO-level KPI overview: active users, LLM spend, workflows automated, satisfaction, trends
+2. **LLM Costs & Usage** — Daily spend, token consumption, latency, provider distribution
+3. **Workflow Executions** — Execution counts, failure rates, top workflows, runtime trends
+4. **Tool Usage Analytics** — Tool call volumes, failure rates, success/fail breakdown
+5. **User Activity & Platform Health** — Authentications, registrations, chat conversations, feedback ratings
 
 ## Setup
 
 ```bash
 # 1. Clone the repo
-git clone git@github.com:valantic/workoflow-metrics.git
+git clone git@github.com:valantic-CEC-Deutschland-GmbH/workoflow-metrics.git
 cd workoflow-metrics
 
 # 2. Configure credentials
@@ -56,6 +57,18 @@ docker compose up -d
 ./scripts/deploy.sh logs
 ./scripts/deploy.sh status
 ```
+
+## Accessing Grafana (SSH Tunnel)
+
+Grafana runs on `val-workoflow-prod:3030` and is not publicly exposed. To access it from your local machine, create an SSH tunnel:
+
+```bash
+ssh -L 3030:localhost:3030 val-workoflow-prod
+```
+
+Then open [http://localhost:3030](http://localhost:3030) in your browser.
+
+Login credentials are in the `.env` file on the production server at `/home/docker/docker-setups/workoflow-metrics/.env`.
 
 ## Ports
 

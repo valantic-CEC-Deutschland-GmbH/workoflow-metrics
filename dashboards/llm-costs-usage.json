@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "llm-costs-usage",
-  "title": "LLM Costs & Usage",
+  "title": "LLM Costs & Usage (LiteLLM)",
   "tags": ["workoflow", "llm", "costs"],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -85,7 +85,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT SUM(spend) AS \"Total Spend ($)\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)",
+          "rawSql": "SELECT SUM(spend) AS \"Total Spend ($)\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -143,7 +143,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT\n  ROUND(SUM(spend)::numeric / NULLIF(SUM(api_requests), 0), 4) AS \"Avg Cost per Request ($)\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)",
+          "rawSql": "SELECT\n  ROUND(SUM(spend)::numeric / NULLIF(SUM(api_requests), 0), 4) AS \"Avg Cost per Request ($)\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -284,7 +284,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT\n  date AS time,\n  model,\n  SUM(spend) AS spend\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY date, model\nORDER BY date",
+          "rawSql": "SELECT\n  date::timestamp AS time,\n  model,\n  SUM(spend) AS spend\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)\nGROUP BY date, model\nORDER BY date",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -379,7 +379,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT\n  date AS time,\n  SUM(prompt_tokens) AS \"Prompt Tokens\",\n  SUM(completion_tokens) AS \"Completion Tokens\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+          "rawSql": "SELECT\n  date::timestamp AS time,\n  SUM(prompt_tokens) AS \"Prompt Tokens\",\n  SUM(completion_tokens) AS \"Completion Tokens\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)\nGROUP BY date\nORDER BY date",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -463,7 +463,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT\n  date AS time,\n  SUM(api_requests) AS \"Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+          "rawSql": "SELECT\n  date::timestamp AS time,\n  SUM(api_requests) AS \"Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)\nGROUP BY date\nORDER BY date",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -604,7 +604,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT\n  custom_llm_provider AS \"Provider\",\n  SUM(spend) AS \"Spend\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY custom_llm_provider\nORDER BY \"Spend\" DESC",
+          "rawSql": "SELECT\n  custom_llm_provider AS \"Provider\",\n  SUM(spend) AS \"Spend\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)\nGROUP BY custom_llm_provider\nORDER BY \"Spend\" DESC",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -688,7 +688,7 @@
             "type": "postgres",
             "uid": "litellm-postgres"
           },
-          "rawSql": "SELECT\n  date AS time,\n  SUM(failed_requests) AS \"Failed Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+          "rawSql": "SELECT\n  date::timestamp AS time,\n  SUM(failed_requests) AS \"Failed Requests\"\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)\nGROUP BY date\nORDER BY date",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -751,7 +751,7 @@
       "targets": [
         {
           "datasource": { "type": "postgres", "uid": "litellm-postgres" },
-          "rawSql": "SELECT\n  api_key,\n  SUM(spend) AS spend,\n  SUM(api_requests) AS requests,\n  SUM(prompt_tokens) AS prompt_tokens,\n  SUM(completion_tokens) AS completion_tokens\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date)\nGROUP BY api_key\nORDER BY spend DESC",
+          "rawSql": "SELECT\n  api_key,\n  SUM(spend) AS spend,\n  SUM(api_requests) AS requests,\n  SUM(prompt_tokens) AS prompt_tokens,\n  SUM(completion_tokens) AS completion_tokens\nFROM \"LiteLLM_DailyUserSpend\"\nWHERE $__timeFilter(date::timestamp)\nGROUP BY api_key\nORDER BY spend DESC",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
