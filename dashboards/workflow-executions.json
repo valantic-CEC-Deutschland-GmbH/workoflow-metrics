@@ -632,7 +632,7 @@
             "type": "postgres",
             "uid": "n8n-internal"
           },
-          "rawSql": "SELECT\n  p.\"periodStart\" AS time,\n  m.\"workflowName\" AS metric,\n  SUM(p.value) AS \"Time Saved\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")\nGROUP BY p.\"periodStart\", m.\"workflowName\"\nORDER BY 1",
+          "rawSql": "SELECT\n  date_trunc('day', e.\"startedAt\") AS time,\n  w.name AS metric,\n  COUNT(*) * (w.settings::json->>'timeSavedPerExecution')::numeric AS \"Time Saved\"\nFROM execution_entity e\nJOIN workflow_entity w ON e.\"workflowId\" = w.id\nWHERE $__timeFilter(e.\"startedAt\")\n  AND e.status = 'success'\n  AND w.settings::json->>'timeSavedPerExecution' IS NOT NULL\nGROUP BY 1, w.name, w.settings::json->>'timeSavedPerExecution'\nORDER BY 1",
           "format": "table",
           "refId": "A",
           "editorMode": "code"
@@ -692,7 +692,7 @@
             "type": "postgres",
             "uid": "n8n-internal"
           },
-          "rawSql": "SELECT\n  m.\"workflowName\" AS \"Workflow\",\n  ROUND(SUM(p.value), 0) AS \"Time Saved (minutes)\"\nFROM insights_by_period p\nJOIN insights_metadata m ON p.\"metaId\" = m.\"metaId\"\nWHERE p.type = 0\n  AND $__timeFilter(p.\"periodStart\")\nGROUP BY m.\"workflowName\"\nORDER BY \"Time Saved (minutes)\" DESC\nLIMIT 15",
+          "rawSql": "SELECT\n  w.name AS \"Workflow\",\n  COUNT(*) * (w.settings::json->>'timeSavedPerExecution')::numeric AS \"Time Saved (minutes)\"\nFROM execution_entity e\nJOIN workflow_entity w ON e.\"workflowId\" = w.id\nWHERE $__timeFilter(e.\"startedAt\")\n  AND e.status = 'success'\n  AND w.settings::json->>'timeSavedPerExecution' IS NOT NULL\nGROUP BY w.name, w.settings::json->>'timeSavedPerExecution'\nORDER BY \"Time Saved (minutes)\" DESC\nLIMIT 15",
           "format": "table",
           "refId": "A",
           "editorMode": "code"

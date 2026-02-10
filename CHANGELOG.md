@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2026-02-10
+
+### Fixed
+- **Time saved queries using unreliable insights tables** — Switched "Per-Workflow Time Saved" time series and "Top Workflows by Time Saved" bar chart from `insights_by_period`/`insights_metadata` to `execution_entity` joined with `workflow_entity.settings->timeSavedPerExecution`. Calculates time saved as successful execution count × configured minutes per execution, which is more accurate and avoids missing data from insights aggregation delays.
+
 ## 2026-02-09
 
 ### Fixed
